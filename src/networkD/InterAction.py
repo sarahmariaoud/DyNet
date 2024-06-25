@@ -9,33 +9,42 @@ def _validate_update_function(update_func):
     if update_func:
         updater_signature = inspect.signature(update_func)
         updater_params = updater_signature.parameters
-        assert len(updater_params) == 2, "Updater function must accept two parameters: (System, maps)"
-        assert updater_signature.return_annotation in [np.ndarray, None], \
-            "Updater must return a numpy ndarray or None"
+        assert (
+            len(updater_params) == 2
+        ), "Updater function must accept two parameters: (System, maps)"
+        assert updater_signature.return_annotation in [
+            np.ndarray,
+            None,
+        ], "Updater must return a numpy ndarray or None"
 
 
 def _validate_map_function(map_func):
     mf_signature = inspect.signature(map_func)
     mf_params = mf_signature.parameters
-    assert len(mf_params) == 3, "Map function must accept three parameters: (int, int, System)"
+    assert (
+        len(mf_params) == 3
+    ), "Map function must accept three parameters: (int, int, System)"
 
 
 def _check_first_three_params(params, expected_types):
     param_names = list(params)[:3]
     param_types = [params[name].annotation for name in param_names]
     for i, expected_type in enumerate(expected_types):
-        assert param_types[i] == expected_type, \
-            f"The parameter {param_names[i]} must be of type {expected_type.__name__}"
+        assert (
+            param_types[i] == expected_type
+        ), f"The parameter {param_names[i]} must be of type {expected_type.__name__}"
 
 
 def _check_keyword_params(params, kwargs):
     for param_name, param in params.items():
         if param.kind == inspect.Parameter.KEYWORD_ONLY:
-            assert param_name in kwargs, \
-                f"Missing keyword argument: {param_name} required by the rate function"
+            assert (
+                param_name in kwargs
+            ), f"Missing keyword argument: {param_name} required by the rate function"
             if param.default is not inspect.Parameter.empty:
-                assert kwargs[param_name] == param.default, \
-                    f"Default value for {param_name} does not match"
+                assert (
+                    kwargs[param_name] == param.default
+                ), f"Default value for {param_name} does not match"
 
 
 def _validate_rate_function(rate_func, kwargs):
@@ -67,7 +76,8 @@ class InterAction:
         self.update_func = update_func
         self.kwargs = kwargs
 
-        self.n_body = 2 # number of bodies
+        self.n_body = 2  # number of bodies
+
     # Other parts of the class remain unchanged ...
 
     def get_propensity(self, i: int, j: int, S: System.System):
@@ -105,9 +115,11 @@ class InterAction:
         """
         if self.update_func:
             result = self.update_func(S, maps)
-            assert (isinstance(result, np.ndarray) and result.ndim == 2) or result is None, \
+            assert (
+                isinstance(result, np.ndarray) and result.ndim == 2
+            ) or result is None, (
                 "Updater function must return a 2D numpy ndarray or None"
+            )
             return result
         else:
             return None
-
